@@ -1,3 +1,11 @@
+Build and run
+=============
+* Build `mvn clean package`
+* Look for the jar with dependencies in /target and run `java -jar game-1.0-SNAPSHOT-jar-with-dependencies.jar`
+
+
+
+
 Game Menu
 =========
 * s: welcome! 1) play, 2) load saved game
