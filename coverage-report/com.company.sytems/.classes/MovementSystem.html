@@ -1,0 +1,190 @@
+
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html id="htmlId">
+<head>
+  <title>Coverage Report :: MovementSystem</title>
+  <style type="text/css">
+    @import "../../.css/coverage.css";
+  </style>
+</head>
+
+<body>
+<div class="header"></div>
+
+<div class="content">
+<div class="breadCrumbs">
+    [ <a href="../../index.html">all classes</a> ]
+    [ <a href="../index.html">com.company.sytems</a> ]
+</div>
+
+<h1>Coverage Summary for Class: MovementSystem (com.company.sytems)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">MovementSystem</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (3/ 3)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    81%
+  </span>
+  <span class="absValue">
+    (34/ 42)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">MovementSystem$1</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/ 1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/ 1)
+  </span>
+</td>
+  </tr>
+<tr>
+  <td class="name"><strong>total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (4/ 4)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    81.4%
+  </span>
+  <span class="absValue">
+    (35/ 43)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<div class="sourceCode"><i>1</i>&nbsp;package com.company.sytems;
+<i>2</i>&nbsp;
+<i>3</i>&nbsp;import com.company.commands.Command;
+<i>4</i>&nbsp;import com.company.components.Position;
+<i>5</i>&nbsp;import com.company.context.CommandType;
+<i>6</i>&nbsp;import com.company.controller.Response;
+<i>7</i>&nbsp;import com.company.controller.ResponseMessage;
+<i>8</i>&nbsp;import com.company.entities.Fight;
+<i>9</i>&nbsp;import com.company.entities.World;
+<i>10</i>&nbsp;import com.company.entities.game.Game;
+<i>11</i>&nbsp;import com.company.entities.game.GameState;
+<i>12</i>&nbsp;
+<i>13</i>&nbsp;import java.util.List;
+<i>14</i>&nbsp;
+<i>15</i>&nbsp;public class MovementSystem implements GameSystem&lt;Response&gt;{
+<i>16</i>&nbsp;    
+<i>17</i>&nbsp;    private final List&lt;CommandType&gt; allowedCommands;
+<i>18</i>&nbsp;    
+<b class="fc"><i>19</i>&nbsp;    public MovementSystem(List&lt;CommandType&gt; allowedCommands){</b>
+<b class="fc"><i>20</i>&nbsp;        this.allowedCommands = allowedCommands;</b>
+<b class="fc"><i>21</i>&nbsp;    }</b>
+<i>22</i>&nbsp;
+<i>23</i>&nbsp;    public Response execute(Game game, Command command) {
+<i>24</i>&nbsp;
+<b class="fc"><i>25</i>&nbsp;        if(game.getState() != GameState.Explore) {</b>
+<b class="nc"><i>26</i>&nbsp;            Response response = new Response(ResponseMessage.CannotMoveNow);</b>
+<b class="nc"><i>27</i>&nbsp;            response.addResponseMessage(game.getState().getStateMessage());</b>
+<b class="nc"><i>28</i>&nbsp;            return response;</b>
+<i>29</i>&nbsp;        }
+<i>30</i>&nbsp;        
+<b class="fc"><i>31</i>&nbsp;        if(! allowedCommands.contains(command.getCommandType())){</b>
+<b class="fc"><i>32</i>&nbsp;            Response response = new Response(ResponseMessage.ShouldBeExploring);</b>
+<b class="fc"><i>33</i>&nbsp;            response.addResponseMessage(game.getState().getStateMessage());</b>
+<b class="fc"><i>34</i>&nbsp;            return response;</b>
+<i>35</i>&nbsp;        }
+<i>36</i>&nbsp;        
+<b class="fc"><i>37</i>&nbsp;        if(command.getCommandType() == CommandType.Save){</b>
+<b class="fc"><i>38</i>&nbsp;            game.setState(GameState.SaveGame);</b>
+<b class="fc"><i>39</i>&nbsp;            return new Response(game.getState().getStateMessage());</b>
+<i>40</i>&nbsp;        }
+<i>41</i>&nbsp;        
+<b class="fc"><i>42</i>&nbsp;        return processMovement(game, command);</b>
+<i>43</i>&nbsp;    }
+<i>44</i>&nbsp;
+<i>45</i>&nbsp;    private Response processMovement(Game game, Command command) {
+<b class="fc"><i>46</i>&nbsp;        Position currentPosition = game.getWorld().getZombie().getPosition();</b>
+<b class="fc"><i>47</i>&nbsp;        World world = game.getWorld();</b>
+<i>48</i>&nbsp;        
+<b class="fc"><i>49</i>&nbsp;        int xInc = 0;</b>
+<b class="fc"><i>50</i>&nbsp;        int yInc = 0;</b>
+<i>51</i>&nbsp;
+<b class="fc"><i>52</i>&nbsp;        switch (command.getCommandType()){</b>
+<b class="fc"><i>53</i>&nbsp;            case MoveNorth: xInc -= 1; break;</b>
+<b class="fc"><i>54</i>&nbsp;            case MoveSouth: xInc += 1; break;</b>
+<b class="fc"><i>55</i>&nbsp;            case MoveEast: yInc += 1; break;</b>
+<b class="fc"><i>56</i>&nbsp;            case MoveWest: yInc -= 1; break;</b>
+<i>57</i>&nbsp;        }
+<i>58</i>&nbsp;
+<b class="fc"><i>59</i>&nbsp;        Response response = new Response();</b>
+<b class="fc"><i>60</i>&nbsp;        Position nextPos = new Position(currentPosition.getX() + xInc, currentPosition.getY() + yInc);</b>
+<i>61</i>&nbsp;
+<b class="fc"><i>62</i>&nbsp;        if(nextPos == null || world.getMaze().getItemAt(nextPos) == &quot;W&quot;){</b>
+<b class="fc"><i>63</i>&nbsp;            response.addResponseMessage(ResponseMessage.Wall);</b>
+<b class="fc"><i>64</i>&nbsp;        } else if( world.getMaze().getItemAt(nextPos) == &quot; &quot;) {</b>
+<b class="fc"><i>65</i>&nbsp;            world.getZombie().setPosition(nextPos);</b>
+<b class="fc"><i>66</i>&nbsp;            response.addResponseMessage(ResponseMessage.Good);</b>
+<b class="fc"><i>67</i>&nbsp;        } else if(world.getMaze().getItemAt(nextPos) == &quot;X&quot;){</b>
+<b class="nc"><i>68</i>&nbsp;            game.setState(GameState.LevelCompleted);</b>
+<b class="nc"><i>69</i>&nbsp;            ResponseMessage stateMessage = game.getState().getStateMessage();</b>
+<b class="nc"><i>70</i>&nbsp;            stateMessage.setMessageParams(ResponseMessage.Level2.getMessageKey());</b>
+<b class="nc"><i>71</i>&nbsp;            response.addResponseMessage(stateMessage);</b>
+<b class="nc"><i>72</i>&nbsp;        } else {</b>
+<b class="fc"><i>73</i>&nbsp;            response.addResponseMessage(ResponseMessage.EngageQuestion);</b>
+<b class="fc"><i>74</i>&nbsp;            world.setFight(new Fight());</b>
+<b class="fc"><i>75</i>&nbsp;            world.getFight().setGeekPosition(nextPos);</b>
+<b class="fc"><i>76</i>&nbsp;            game.setState(GameState.Engage);</b>
+<i>77</i>&nbsp;        }
+<i>78</i>&nbsp;
+<b class="fc"><i>79</i>&nbsp;        return response;</b>
+<i>80</i>&nbsp;    }
+<i>81</i>&nbsp;}
+</div>
+</div>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2015-09-28 10:14</div>
+</div>
+</body>
+</html>

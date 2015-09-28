@@ -1,0 +1,194 @@
+
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html id="htmlId">
+<head>
+  <title>Coverage Report :: FightSystem</title>
+  <style type="text/css">
+    @import "../../.css/coverage.css";
+  </style>
+</head>
+
+<body>
+<div class="header"></div>
+
+<div class="content">
+<div class="breadCrumbs">
+    [ <a href="../../index.html">all classes</a> ]
+    [ <a href="../index.html">com.company.sytems</a> ]
+</div>
+
+<h1>Coverage Summary for Class: FightSystem (com.company.sytems)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">FightSystem</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/ 1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (5/ 5)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    98%
+  </span>
+  <span class="absValue">
+    (48/ 49)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<div class="sourceCode"><i>1</i>&nbsp;package com.company.sytems;
+<i>2</i>&nbsp;
+<i>3</i>&nbsp;import com.company.commands.Command;
+<i>4</i>&nbsp;import com.company.context.CommandType;
+<i>5</i>&nbsp;import com.company.controller.Response;
+<i>6</i>&nbsp;import com.company.controller.ResponseMessage;
+<i>7</i>&nbsp;import com.company.entities.Fight;
+<i>8</i>&nbsp;import com.company.entities.game.Game;
+<i>9</i>&nbsp;import com.company.entities.game.GameState;
+<i>10</i>&nbsp;import org.apache.commons.lang3.RandomUtils;
+<i>11</i>&nbsp;
+<i>12</i>&nbsp;import java.util.List;
+<i>13</i>&nbsp;
+<i>14</i>&nbsp;public class FightSystem implements GameSystem&lt;Response&gt; {
+<i>15</i>&nbsp;    
+<i>16</i>&nbsp;    private final List&lt;CommandType&gt; allowedCommands;
+<i>17</i>&nbsp;    
+<b class="fc"><i>18</i>&nbsp;    public FightSystem(List&lt;CommandType&gt; commandTypes) {</b>
+<b class="fc"><i>19</i>&nbsp;        allowedCommands = commandTypes;</b>
+<b class="fc"><i>20</i>&nbsp;    }</b>
+<i>21</i>&nbsp;
+<i>22</i>&nbsp;    @Override
+<i>23</i>&nbsp;    public Response execute(Game game, Command command) {
+<b class="fc"><i>24</i>&nbsp;        if(game.getState() != GameState.Fight){</b>
+<b class="nc"><i>25</i>&nbsp;            return new Response(ResponseMessage.NothingToFight);</b>
+<i>26</i>&nbsp;        }
+<i>27</i>&nbsp;
+<b class="fc"><i>28</i>&nbsp;        if(! allowedCommands.contains(command.getCommandType())){</b>
+<b class="fc"><i>29</i>&nbsp;            return new Response(game.getState().getStateMessage());</b>
+<i>30</i>&nbsp;        }
+<i>31</i>&nbsp;
+<b class="fc"><i>32</i>&nbsp;        Response response = null;</b>
+<i>33</i>&nbsp;        
+<i>34</i>&nbsp;        //-- Who hits first??
+<b class="fc"><i>35</i>&nbsp;        if(RandomUtils.nextInt(0, 2) == 0){</b>
+<b class="fc"><i>36</i>&nbsp;            response = processGeekHit(game);</b>
+<b class="fc"><i>37</i>&nbsp;            response = response != null </b>
+<i>38</i>&nbsp;                    ? response 
+<b class="fc"><i>39</i>&nbsp;                    : processZombieHit(command, game);</b>
+<i>40</i>&nbsp;        } else {
+<b class="fc"><i>41</i>&nbsp;            response = processZombieHit(command, game);</b>
+<b class="fc"><i>42</i>&nbsp;            Response gameOver = processGeekHit(game);</b>
+<b class="fc"><i>43</i>&nbsp;            response = gameOver != null </b>
+<i>44</i>&nbsp;                    ? gameOver 
+<i>45</i>&nbsp;                    : response;
+<i>46</i>&nbsp;        }
+<i>47</i>&nbsp;        
+<b class="fc"><i>48</i>&nbsp;        if(game.getState() == GameState.Fight)</b>
+<b class="fc"><i>49</i>&nbsp;            response.addResponseMessage(processScoreMessage(game));</b>
+<i>50</i>&nbsp;        
+<b class="fc"><i>51</i>&nbsp;        return response;</b>
+<i>52</i>&nbsp;    }
+<i>53</i>&nbsp;    
+<i>54</i>&nbsp;    private Response processZombieHit(Command command, Game game){
+<i>55</i>&nbsp;
+<b class="fc"><i>56</i>&nbsp;        Response response = null;</b>
+<i>57</i>&nbsp;
+<b class="fc"><i>58</i>&nbsp;        int zombieScore = game.getWorld().getFight().getZombieScore();</b>
+<i>59</i>&nbsp;        
+<b class="fc"><i>60</i>&nbsp;        if(command.getCommandType() == CommandType.FightWithKick){</b>
+<b class="fc"><i>61</i>&nbsp;            zombieScore += game.getLevel().getFightScore().getKickValue();</b>
+<b class="fc"><i>62</i>&nbsp;            game.getWorld().getFight().setZombieScore(zombieScore);</b>
+<b class="fc"><i>63</i>&nbsp;            response = new Response(ResponseMessage.KickSound);</b>
+<i>64</i>&nbsp;            
+<b class="fc"><i>65</i>&nbsp;        } else if (command.getCommandType() == CommandType.FightWithPunch){</b>
+<b class="fc"><i>66</i>&nbsp;            zombieScore += game.getLevel().getFightScore().getPunchValue();</b>
+<b class="fc"><i>67</i>&nbsp;            game.getWorld().getFight().setZombieScore(zombieScore);</b>
+<b class="fc"><i>68</i>&nbsp;            response = new Response(ResponseMessage.PunchSound);</b>
+<i>69</i>&nbsp;        }
+<i>70</i>&nbsp;
+<b class="fc"><i>71</i>&nbsp;        if(zombieScore &gt;= game.getLevel().getFightScore().getMaxScore()){</b>
+<b class="fc"><i>72</i>&nbsp;            game.setState(GameState.Reward);</b>
+<i>73</i>&nbsp;            
+<i>74</i>&nbsp;            //-- Geek defeated! Delete its position value
+<b class="fc"><i>75</i>&nbsp;            game.getWorld().getMaze().deleteItemAt(game.getWorld().getFight().getGeekPosition());</b>
+<i>76</i>&nbsp;            
+<i>77</i>&nbsp;            //-- Move zombie to defeated geek position
+<b class="fc"><i>78</i>&nbsp;            game.getWorld().getZombie().setPosition(game.getWorld().getFight().getGeekPosition());</b>
+<b class="fc"><i>79</i>&nbsp;            response = new Response(ResponseMessage.ZombieWonFight);</b>
+<i>80</i>&nbsp;        }
+<i>81</i>&nbsp;        
+<b class="fc"><i>82</i>&nbsp;        return response;</b>
+<i>83</i>&nbsp;    }
+<i>84</i>&nbsp;    
+<i>85</i>&nbsp;    private Response processGeekHit(Game game){
+<b class="fc"><i>86</i>&nbsp;        int geekScore = game.getWorld().getFight().getGeekScore();</b>
+<b class="fc"><i>87</i>&nbsp;        game.getWorld().getFight().setGeekScore( geekScore +</b>
+<b class="fc"><i>88</i>&nbsp;                RandomUtils.nextInt(game.getLevel().getFightScore().getMinRandom(),</b>
+<b class="fc"><i>89</i>&nbsp;                        game.getLevel().getFightScore().getMaxRandom() + 1));</b>
+<i>90</i>&nbsp;
+<b class="fc"><i>91</i>&nbsp;        if(geekScore &gt;= game.getLevel().getFightScore().getMaxScore()){</b>
+<b class="fc"><i>92</i>&nbsp;            game.setState(GameState.GameOver);</b>
+<b class="fc"><i>93</i>&nbsp;            return new Response(ResponseMessage.GeekWonFight);</b>
+<i>94</i>&nbsp;        }
+<i>95</i>&nbsp;        
+<b class="fc"><i>96</i>&nbsp;        return null;</b>
+<i>97</i>&nbsp;    }
+<i>98</i>&nbsp;    
+<i>99</i>&nbsp;    private ResponseMessage processScoreMessage(Game game){
+<b class="fc"><i>100</i>&nbsp;        Fight fight = game.getWorld().getFight();</b>
+<i>101</i>&nbsp;        
+<b class="fc"><i>102</i>&nbsp;        String geekScore = fight.getGeekScore() + &quot;&quot;;</b>
+<b class="fc"><i>103</i>&nbsp;        String zombieScrore = fight.getZombieScore()  + &quot;&quot;;</b>
+<b class="fc"><i>104</i>&nbsp;        String maxFightScore = game.getLevel().getFightScore().getMaxScore()  + &quot;&quot;;</b>
+<i>105</i>&nbsp;        
+<b class="fc"><i>106</i>&nbsp;        ResponseMessage partialScore = ResponseMessage.PartialScore;</b>
+<b class="fc"><i>107</i>&nbsp;        partialScore.setMessageParams(geekScore, zombieScrore, maxFightScore);</b>
+<i>108</i>&nbsp;        
+<b class="fc"><i>109</i>&nbsp;        return partialScore;</b>
+<i>110</i>&nbsp;    }
+<i>111</i>&nbsp;}
+</div>
+</div>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2015-09-28 10:14</div>
+</div>
+</body>
+</html>
